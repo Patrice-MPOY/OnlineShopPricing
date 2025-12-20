@@ -5,7 +5,7 @@ namespace OnlineShopPricing.Core.Services
     /// <summary>
     /// Factory to create the appropriate pricing strategy based on customer type.
     /// Manual instantiation is used for clarity in this exercise.
-    /// In a real application, strategies would be registered in the DI container and resolved automatically.
+    /// In a real application, strategies would be registered in the DI container and resolved automatically
     /// </summary>
     public class PricingStrategyFactory
     {
