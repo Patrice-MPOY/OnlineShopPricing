@@ -12,11 +12,14 @@ namespace OnlineShopPricing.Core.Services
         { ProductType.Laptop, 1000m }
     };
 
+        public bool TryGetUnitPrice(ProductType product, out decimal price)
+        {
+            return Prices.TryGetValue(product, out price);
+        }
+
         public decimal GetUnitPrice(ProductType product)
         {
-            return Prices.TryGetValue(product, out var price)
-                ? price
-                : throw new ArgumentException($"Unknown product: {product}");
+            return Prices[product]; // Plus besoin de TryGetValue + exception – validé en amont
         }
     }
 }

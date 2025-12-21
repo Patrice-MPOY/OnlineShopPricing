@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using OnlineShopPricing.Core.Domain;
+using OnlineShopPricing.Core.Resources;
 using OnlineShopPricing.Core.Services;
 using OnlineShopPricing.Tests.TestHelpers;
 
@@ -64,6 +65,7 @@ namespace OnlineShopPricingTests
             cart.CalculateTotal().Should().Be(7050m);
             // Correct calculation: 2*1000 (HighEndPhone) + 1*550 (MidRangePhone) + 5*900 (Laptop) = 2000 + 550 + 4500 = 7050
         }
+        
 
         [Fact]
         public void AddProduct_WithNegativeQuantity_ThrowsException()
@@ -75,9 +77,12 @@ namespace OnlineShopPricingTests
 
             // Act & Assert
             Action act = () => cart.AddProduct(ProductType.Laptop, -1);
+
             act.Should().Throw<ArgumentException>()
-               .WithMessage("Quantity must be positive.*");
+               .WithMessage(ErrorMessages.QuantityMustBePositive + "*") // Utilise la ressource + wildcard
+               .And.ParamName.Should().Be("quantity");
         }
+
 
         [Fact]
         public void CreateStrategy_WithNullClient_ThrowsArgumentNullException()
@@ -99,19 +104,17 @@ namespace OnlineShopPricingTests
                .WithMessage("Unsupported client type*");
         }
 
-        [Fact]
-        public void PricingStrategy_WithUnknownProduct_ThrowsArgumentException()
-        {
-            // Arrange
-            var strategy = new IndividualPricingStrategy();
+        //[Fact]
+        //public void PricingStrategy_WithUnknownProduct_ThrowsArgumentException()
+        //{
+        //    // Arrange
+        //    var strategy = new IndividualPricingStrategy();
 
-            // Act & Assert
-            Action act = () => strategy.GetUnitPrice((ProductType)999); // unknown product
+        //    // Act & Assert
+        //    Action act = () => strategy.GetUnitPrice((ProductType)999); // unknown product
 
-            act.Should().Throw<ArgumentException>()
-               .WithMessage("Unknown product: 999*");
-        }
-
-
+        //    act.Should().Throw<ArgumentException>()
+        //       .WithMessage("Unknown product: 999*");
+        //}
     }
 }

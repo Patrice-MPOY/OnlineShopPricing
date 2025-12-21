@@ -1,6 +1,5 @@
-﻿using OnlineShopPricing.Core.Services;
-
-
+﻿using OnlineShopPricing.Core.Resources;
+using OnlineShopPricing.Core.Services;
 namespace OnlineShopPricing.Core.Domain
 {
     /// <summary>
@@ -12,25 +11,27 @@ namespace OnlineShopPricing.Core.Domain
     /// </summary>
     public class Cart(Customer customer, IPricingStrategy pricingStrategy)
     {
-        private readonly Dictionary<ProductType, int> _items = [];
-        
+        private readonly Dictionary<ProductType, int> _items = [];        
         private readonly IPricingStrategy _pricingStrategy = pricingStrategy ?? throw new ArgumentNullException(nameof(pricingStrategy));
 
         public void AddProduct(ProductType product, int quantity)
-        {
-            if (quantity <= 0) throw new ArgumentException("Quantity must be positive.");
+        { 
+            if (quantity <= 0) throw new ArgumentException(ErrorMessages.QuantityMustBePositive, nameof(quantity));
+
+            // Validation of ProductType: the product must exist in the current pricing grid
+            if (!_pricingStrategy.TryGetUnitPrice(product, out _))
+                throw new ArgumentException(ErrorMessages.InvalidProductType, nameof(product));
 
             if (_items.TryGetValue(product, out var current))
                 _items[product] = current + quantity;
             else
                 _items[product] = quantity;
-        }        
+        }     
 
         public decimal CalculateTotal() =>
             _items.Sum(item => _pricingStrategy.GetUnitPrice(item.Key) * item.Value);
 
         public IReadOnlyDictionary<ProductType, int> Items => _items;
-
         public Customer Customer => customer;
     }
 }
