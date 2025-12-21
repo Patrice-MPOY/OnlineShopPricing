@@ -1,4 +1,5 @@
 ﻿using OnlineShopPricing.Core.Domain;
+using OnlineShopPricing.Core.Resources;
 
 namespace OnlineShopPricing.Core.Services
 {
@@ -12,15 +13,16 @@ namespace OnlineShopPricing.Core.Services
         public PricingStrategyFactory()
         {
         }
-        public IPricingStrategy CreateStrategy(Customer client)
+        public IPricingStrategy CreateStrategy(Customer customer)
         {
-            if (client == null) throw new ArgumentNullException(nameof(client));
-            return client switch
+            ArgumentNullException.ThrowIfNull(customer, nameof(customer));
+
+            return customer switch
             {
                 IndividualCustomer => new IndividualPricingStrategy(),
                 BusinessCustomer business when business.IsLargeAccount => new LargeBusinessPricingStrategy(),
                 BusinessCustomer => new SmallBusinessPricingStrategy(),
-                _ => throw new ArgumentException("Unsupported client type")
+                _ => throw new ArgumentException(ErrorMessages.InvalidCustomerType, nameof(customer))
             };
         }
     }

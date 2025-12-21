@@ -117,8 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="InvalidCustomerType" xml:space="preserve">
+    <value>Ongeldig klanttype.</value>
+  </data>
   <data name="InvalidProductType" xml:space="preserve">
-    <value>Ongeldig producttype</value>
+    <value>Ongeldig producttype.</value>
   </data>
   <data name="QuantityMustBePositive" xml:space="preserve">
     <value>De hoeveelheid moet strikt positief zijn.</value>

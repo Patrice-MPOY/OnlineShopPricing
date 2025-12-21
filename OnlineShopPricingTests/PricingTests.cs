@@ -79,7 +79,7 @@ namespace OnlineShopPricingTests
             Action act = () => cart.AddProduct(ProductType.Laptop, -1);
 
             act.Should().Throw<ArgumentException>()
-               .WithMessage(ErrorMessages.QuantityMustBePositive + "*") // Utilise la ressource + wildcard
+               .WithMessage(ErrorMessages.QuantityMustBePositive + "*") 
                .And.ParamName.Should().Be("quantity");
         }
 
@@ -93,28 +93,17 @@ namespace OnlineShopPricingTests
         }
 
         [Fact]
-        public void CreateStrategy_WithUnsupportedClientType_ThrowsArgumentException()
+        public void CreateStrategy_WithInvalidCustomerType_ThrowsArgumentException()
         {
-            // Arrange - A fictiv class
-            var unsupportedClient = new UnsupportedCustomer();
+            // Arrange - A fictive class
+            var unsupportedClient = new InvalidCustomerType();
 
             // Act & Assert
             Action act = () => _factory.CreateStrategy(unsupportedClient);
+
             act.Should().Throw<ArgumentException>()
-               .WithMessage("Unsupported client type*");
+                .WithMessage(ErrorMessages.InvalidCustomerType + "*")
+                .And.ParamName.Should().Be("customer");
         }
-
-        //[Fact]
-        //public void PricingStrategy_WithUnknownProduct_ThrowsArgumentException()
-        //{
-        //    // Arrange
-        //    var strategy = new IndividualPricingStrategy();
-
-        //    // Act & Assert
-        //    Action act = () => strategy.GetUnitPrice((ProductType)999); // unknown product
-
-        //    act.Should().Throw<ArgumentException>()
-        //       .WithMessage("Unknown product: 999*");
-        //}
     }
 }
