@@ -16,7 +16,7 @@ namespace OnlineShopPricingTests
     {
         private readonly PricingStrategyFactory _factory = new();
         [Fact]
-        public void Cart_WithIndividualCustomer_AppliesCorrectPricing()
+        public void CalculateTotal_WithIndividualCustomer_AppliesCorrectPricing()
         {
             // Arrange
             var client = new IndividualCustomer("IND001", "John", "Doe");
@@ -32,7 +32,7 @@ namespace OnlineShopPricingTests
         }
 
         [Fact]
-        public void Cart_WithSmallBusinessCustomer_AppliesCorrectPricing()
+        public void CalculateTotal_WithSmallBusinessCustomer_AppliesCorrectPricing()
         {
             // Arrange
             var client = new BusinessCustomer("BIZ001", "Small Corp", "REG123", 5_000_000m);
@@ -49,7 +49,7 @@ namespace OnlineShopPricingTests
         }
 
         [Fact]
-        public void Cart_WithLargeBusinessCustomer_AppliesCorrectPricing()
+        public void CalculateTotal_WithLargeBusinessCustomer_AppliesCorrectPricing()
         {
             // Arrange
             var client = new BusinessCustomer("BIZ002", "Large Corp", "REG456", 15_000_000m);
@@ -85,7 +85,7 @@ namespace OnlineShopPricingTests
 
 
         [Fact]
-        public void CreateStrategy_WithNullClient_ThrowsArgumentNullException()
+        public void CreateStrategy_WithNullCustomer_ThrowsArgumentNullException()
         {
             // Act & Assert
             Action act = () => _factory.CreateStrategy(null!);

@@ -9,7 +9,7 @@ public class CartTests
 {         
    
     [Fact]
-    public void CalculateTotal_UsesInjectedStrategy_IsolatedWithMock()
+    public void CalculateTotal_WithMockedStrategy_UsesProvidedPrices()
     {
         // Arrange
         // Create a mock of IPricingStrategy to isolate the Cart from real pricing logic.
@@ -94,7 +94,7 @@ public class CartTests
 
     [Fact]
     
-    public void Cart_RejectsUnknownProduct_ThrowsArgumentException()
+    public void Add_UnknownProduct_ThrowsArgumentException()
     {
         // Arrange
         // Create a real pricing strategy and a cart.
