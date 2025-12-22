@@ -1,5 +1,4 @@
 ﻿using OnlineShopPricing.Core.Domain;
-
 namespace OnlineShopPricing.Core.Services
 {
     public class LargeBusinessPricingStrategy : PricingStrategyBase

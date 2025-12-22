@@ -1,9 +1,7 @@
 ﻿using OnlineShopPricing.Core.Domain;
 
-
 namespace OnlineShopPricing.Core.Services
-{   
-
+{
     public abstract class PricingStrategyBase : IPricingStrategy
     {
         protected abstract IReadOnlyDictionary<ProductType, decimal> Prices { get; }
@@ -18,5 +16,4 @@ namespace OnlineShopPricing.Core.Services
             return Prices[product];
         }
     }
-
 }
