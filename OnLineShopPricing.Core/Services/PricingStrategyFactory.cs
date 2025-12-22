@@ -8,14 +8,11 @@ namespace OnlineShopPricing.Core.Services
     /// Manual instantiation is used for clarity in this exercise.
     /// In a real application strategies would be registered in the DI container and automatically resolved 
     /// </summary>
-    public class PricingStrategyFactory
+    public static class PricingStrategyFactory
     {
-        public PricingStrategyFactory()
+        public static IPricingStrategy CreateStrategy(Customer customer)
         {
-        }
-        public IPricingStrategy CreateStrategy(Customer customer)
-        {
-            ArgumentNullException.ThrowIfNull(customer, nameof(customer));
+            ArgumentNullException.ThrowIfNull(customer);
 
             return customer switch
             {

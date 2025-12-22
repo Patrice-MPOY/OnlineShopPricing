@@ -14,13 +14,13 @@ namespace OnlineShopPricingTests
     /// </summary>
     public class PricingTests
     {
-        private readonly PricingStrategyFactory _factory = new();
+      
         [Fact]
         public void CalculateTotal_WithIndividualCustomer_AppliesCorrectPricing()
         {
             // Arrange
             var client = new IndividualCustomer("IND001", "John", "Doe");
-            var strategy = _factory.CreateStrategy(client);
+            var strategy = PricingStrategyFactory.CreateStrategy(client);
             var cart = new Cart(client, strategy);
 
             // Act
@@ -36,7 +36,7 @@ namespace OnlineShopPricingTests
         {
             // Arrange
             var client = new BusinessCustomer("BIZ001", "Small Corp", "REG123", 5_000_000m);
-            var strategy = _factory.CreateStrategy(client);
+            var strategy = PricingStrategyFactory.CreateStrategy(client);
             var cart = new Cart(client, strategy);
 
             // Act
@@ -53,7 +53,7 @@ namespace OnlineShopPricingTests
         {
             // Arrange
             var client = new BusinessCustomer("BIZ002", "Large Corp", "REG456", 15_000_000m);
-            var strategy = _factory.CreateStrategy(client);
+            var strategy = PricingStrategyFactory.CreateStrategy(client);
             var cart = new Cart(client, strategy);
 
             // Act
@@ -72,7 +72,7 @@ namespace OnlineShopPricingTests
         {
             // Arrange
             var client = new IndividualCustomer("IND001", "John", "Doe");
-            var strategy = _factory.CreateStrategy(client);
+            var strategy = PricingStrategyFactory.CreateStrategy(client);
             var cart = new Cart(client, strategy);
 
             // Act & Assert
@@ -88,7 +88,7 @@ namespace OnlineShopPricingTests
         public void CreateStrategy_WithNullCustomer_ThrowsArgumentNullException()
         {
             // Act & Assert
-            Action act = () => _factory.CreateStrategy(null!);
+            Action act = () => PricingStrategyFactory.CreateStrategy(null!);
             act.Should().Throw<ArgumentNullException>();
         }
 
@@ -99,7 +99,7 @@ namespace OnlineShopPricingTests
             var unsupportedClient = new InvalidCustomerType();
 
             // Act & Assert
-            Action act = () => _factory.CreateStrategy(unsupportedClient);
+            Action act = () => PricingStrategyFactory.CreateStrategy(unsupportedClient);
 
             act.Should().Throw<ArgumentException>()
                 .WithMessage(ErrorMessages.InvalidCustomerType + "*")

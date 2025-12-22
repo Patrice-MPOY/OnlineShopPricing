@@ -1,7 +1,7 @@
 ﻿namespace OnlineShopPricing.Core.Domain
 {
-    public abstract class Customer(string clientId)
+    public abstract class Customer(string customerId)
     {
-        public string ClientId { get; } = clientId ?? throw new ArgumentNullException(nameof(clientId));
+        public string CustomerId { get; } = customerId ?? throw new ArgumentNullException(nameof(customerId));
     }
 }

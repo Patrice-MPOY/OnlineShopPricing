@@ -1,11 +1,11 @@
 ﻿namespace OnlineShopPricing.Core.Domain
 {
     public class BusinessCustomer(
-        string clientId,
+        string customerId,
         string companyName,
         string registrationNumber,
         decimal annualRevenue,
-        string? vatNumber = null) : Customer(clientId)
+        string? vatNumber = null) : Customer(customerId)
     {
         public string CompanyName { get; } = companyName ?? throw new ArgumentNullException(nameof(companyName));
         public string? VatNumber { get; } = vatNumber;

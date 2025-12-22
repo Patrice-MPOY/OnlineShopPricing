@@ -57,7 +57,7 @@ public class CartTests
 
         // Ensure no unexpected calls were made to the strategy.
         // This protects against future regressions.
-        //mockStrategy.VerifyNoOtherCalls();
+        
     }
 
     [Fact]
