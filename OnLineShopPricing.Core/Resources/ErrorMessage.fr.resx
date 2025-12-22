@@ -126,4 +126,7 @@
   <data name="QuantityMustBePositive" xml:space="preserve">
     <value>La quantité doit être positive.</value>
   </data>
+  <data name="VeryLargeQuantityTestExplanation" xml:space="preserve">
+    <value>Une très grande quantité doit être multipliée correctement par le prix unitaire sans débordement ni problème d'arrondi.</value>
+  </data>
 </root>

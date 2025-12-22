@@ -126,4 +126,7 @@
   <data name="QuantityMustBePositive" xml:space="preserve">
     <value>De hoeveelheid moet strikt positief zijn.</value>
   </data>
+  <data name="VeryLargeQuantityTestExplanation" xml:space="preserve">
+    <value>Een zeer grote hoeveelheid moet correct worden vermenigvuldigd met de eenheidsprijs zonder overflow of afrondingsproblemen.</value>
+  </data>
 </root>

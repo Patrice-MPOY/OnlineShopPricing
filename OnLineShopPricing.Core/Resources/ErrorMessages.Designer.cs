@@ -86,5 +86,14 @@ namespace OnlineShopPricing.Core.Resources {
                 return ResourceManager.GetString("QuantityMustBePositive", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à A very large quantity should be multiplied correctly by the unit price without any overflow or rounding issues..
+        /// </summary>
+        public static string VeryLargeQuantityTestExplanation {
+            get {
+                return ResourceManager.GetString("VeryLargeQuantityTestExplanation", resourceCulture);
+            }
+        }
     }
 }

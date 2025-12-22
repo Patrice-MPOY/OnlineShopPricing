@@ -15,18 +15,34 @@ namespace OnlineShopPricing.Core.Domain
         private readonly IPricingStrategy _pricingStrategy = pricingStrategy ?? throw new ArgumentNullException(nameof(pricingStrategy));
 
         public void AddProduct(ProductType product, int quantity)
-        { 
-            if (quantity <= 0) throw new ArgumentException(ErrorMessages.QuantityMustBePositive, nameof(quantity));
+        {
+            GuardAgainstNonPositiveQuantity(quantity);            
+            GuardAgainstUnpricedProduct(product);
 
+            AddOrUpdateItem(product, quantity);
+        }
+        private static void GuardAgainstNonPositiveQuantity(int quantity)
+        {
+            if (quantity <= 0)
+            {
+                throw new ArgumentException(ErrorMessages.QuantityMustBePositive, nameof(quantity));
+            }
+        }
+        private void GuardAgainstUnpricedProduct(ProductType product)
+        {   
             // Validation of ProductType: the product must exist in the current pricing grid
             if (!_pricingStrategy.TryGetUnitPrice(product, out _))
+            {
                 throw new ArgumentException(ErrorMessages.InvalidProductType, nameof(product));
-
+            }
+        }
+        private void AddOrUpdateItem(ProductType product, int quantity)
+        {
             if (_items.TryGetValue(product, out var current))
                 _items[product] = current + quantity;
             else
                 _items[product] = quantity;
-        }     
+        }
 
         public decimal CalculateTotal() =>
             _items.Sum(item => _pricingStrategy.GetUnitPrice(item.Key) * item.Value);

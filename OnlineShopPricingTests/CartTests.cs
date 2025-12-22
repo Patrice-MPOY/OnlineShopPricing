@@ -6,8 +6,11 @@ using OnlineShopPricing.Core.Services;
 
 namespace OnlineShopPricing.Tests;
 public class CartTests
-{         
-   
+{
+    // ==================================================================================
+    // Isolated Unit Tests (using mocked IPricingStrategy)
+    // Purpose: Test the pure mechanics of the Cart independently of actual pricing rules
+    // ===================================================================================
     [Fact]
     public void CalculateTotal_WithMockedStrategy_UsesProvidedPrices()
     {
@@ -92,6 +95,11 @@ public class CartTests
     }
 
 
+    // =====================================================================================
+    // Light Integration Tests (using real pricing strategy)
+    // Purpose: Validate real-world interaction between Cart and a concrete pricing strategy
+    // =====================================================================================
+
     [Fact]
     
     public void Add_UnknownProduct_ThrowsArgumentException()
@@ -114,5 +122,24 @@ public class CartTests
         act.Should().Throw<ArgumentException>()
            .WithMessage(string.Format(ErrorMessages.InvalidProductType, "999") + "*")
            .And.ParamName.Should().Be("product");
+    }
+
+    [Fact]
+    public void CalculateTotal_WithVeryLargeQuantity_ReturnsCorrectTotal()
+    {
+        // Arrange
+        var customer = new IndividualCustomer("ID", "John", "Doe");
+        var cart = new Cart(customer, new IndividualPricingStrategy());
+
+        const int hugeQuantity = int.MaxValue / 2; // Safe value to avoid any theoretical overflow risk
+        cart.AddProduct(ProductType.HighEndPhone, hugeQuantity);
+
+        // Act
+        decimal total = cart.CalculateTotal();
+
+        // Assert (with Fluent Assertions)
+        decimal expected = hugeQuantity * 1500m;
+        total.Should().Be(expected,
+            because: ErrorMessages.VeryLargeQuantityTestExplanation) ;
     }
 }
