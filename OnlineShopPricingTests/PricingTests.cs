@@ -7,103 +7,120 @@ using OnlineShopPricing.Tests.TestHelpers;
 namespace OnlineShopPricingTests
 {
     /// <summary>
-    /// These tests use real pricing strategy implementations to validate end-to-end behavior
-    /// and keep the test suite simple and readable for this limited-scope exercise.     
-    /// The design fully supports mocking IPricingStrategy (via constructor injection),
-    /// which would be used in a larger application to isolate the Cart and achieve faster, more focused unit tests.
+    /// These tests validate pricing behavior using real pricing strategy implementations.
+    /// They are written to remain readable and deterministic while covering the core
+    /// pricing rules of the system.
+    ///
+    /// The Cart supports dependency injection of IPricingStrategy, which allows
+    /// mocking in larger applications to achieve more focused unit tests.
     /// </summary>
     public class PricingTests
     {
-      
-        [Fact]
-        public void CalculateTotal_WithIndividualCustomer_AppliesCorrectPricing()
+        // Shared test data for parameterized pricing tests
+        public static IEnumerable<object[]> CalculateTotalTestData => new List<object[]>
+        {
+            // Individual customer pricing
+            new object[]
+            {
+                new IndividualCustomer("IND001", "John", "Doe"),
+                new (ProductType Product, int Quantity)[]
+                {
+                    (ProductType.HighEndPhone, 1),
+                    (ProductType.Laptop, 2)
+                },
+                3900m
+            },
+
+            // Small business pricing (annual turnover < 10M)
+            new object[]
+            {
+                new BusinessCustomer("BIZ001", "Small Corp", "REG123", 5_000_000m),
+                new (ProductType Product, int Quantity)[]
+                {
+                    (ProductType.HighEndPhone, 1),
+                    (ProductType.MidRangePhone, 3),
+                    (ProductType.Laptop, 1)
+                },
+                3950m
+            },
+
+            // Large business pricing (annual turnover ≥ 10M)
+            new object[]
+            {
+                new BusinessCustomer("BIZ002", "Large Corp", "REG456", 15_000_000m),
+                new (ProductType Product, int Quantity)[]
+                {
+                    (ProductType.HighEndPhone, 2),
+                    (ProductType.MidRangePhone, 1),
+                    (ProductType.Laptop, 5)
+                },
+                7050m
+            }
+        };
+
+        [Theory]
+        [MemberData(nameof(CalculateTotalTestData))]
+        public void CalculateTotal_WhenCustomerTypeChanges_ShouldApplyCorrectPricing(
+            Customer customer,
+            (ProductType Product, int Quantity)[] itemsToAdd,
+            decimal expectedTotal)
         {
             // Arrange
-            var client = new IndividualCustomer("IND001", "John", "Doe");
-            var strategy = PricingStrategyFactory.CreateStrategy(client);
-            var cart = new Cart(client, strategy);
+            var pricingStrategy = PricingStrategyFactory.CreateStrategy(customer);
+            var cart = new Cart(customer, pricingStrategy);
 
             // Act
-            cart.AddProduct(ProductType.HighEndPhone, 1);
-            cart.AddProduct(ProductType.Laptop, 2);
+            foreach (var (product, quantity) in itemsToAdd)
+            {
+                cart.AddProduct(product, quantity);
+            }
+
+            var total = cart.CalculateTotal();
 
             // Assert
-            cart.CalculateTotal().Should().Be(3900m);
+            total.Should().Be(expectedTotal);
         }
 
         [Fact]
-        public void CalculateTotal_WithSmallBusinessCustomer_AppliesCorrectPricing()
+        public void AddProduct_WhenQuantityIsNegative_ShouldThrowArgumentException()
         {
             // Arrange
-            var client = new BusinessCustomer("BIZ001", "Small Corp", "REG123", 5_000_000m);
-            var strategy = PricingStrategyFactory.CreateStrategy(client);
-            var cart = new Cart(client, strategy);
+            var customer = new IndividualCustomer("IND001", "John", "Doe");
+            var pricingStrategy = PricingStrategyFactory.CreateStrategy(customer);
+            var cart = new Cart(customer, pricingStrategy);
 
             // Act
-            cart.AddProduct(ProductType.HighEndPhone, 1);
-            cart.AddProduct(ProductType.MidRangePhone, 3);
-            cart.AddProduct(ProductType.Laptop, 1);
-
-            // Assert
-            cart.CalculateTotal().Should().Be(3950m); // 1150 + 3*600 + 1000 = 1150 + 1800 + 1000 = 3950
-        }
-
-        [Fact]
-        public void CalculateTotal_WithLargeBusinessCustomer_AppliesCorrectPricing()
-        {
-            // Arrange
-            var client = new BusinessCustomer("BIZ002", "Large Corp", "REG456", 15_000_000m);
-            var strategy = PricingStrategyFactory.CreateStrategy(client);
-            var cart = new Cart(client, strategy);
-
-            // Act
-            cart.AddProduct(ProductType.HighEndPhone, 2);
-            cart.AddProduct(ProductType.MidRangePhone, 1);
-            cart.AddProduct(ProductType.Laptop, 5);
-
-            // Assert
-            cart.CalculateTotal().Should().Be(7050m);
-            // Correct calculation: 2*1000 (HighEndPhone) + 1*550 (MidRangePhone) + 5*900 (Laptop) = 2000 + 550 + 4500 = 7050
-        }
-        
-
-        [Fact]
-        public void AddProduct_WithNegativeQuantity_ThrowsException()
-        {
-            // Arrange
-            var client = new IndividualCustomer("IND001", "John", "Doe");
-            var strategy = PricingStrategyFactory.CreateStrategy(client);
-            var cart = new Cart(client, strategy);
-
-            // Act & Assert
             Action act = () => cart.AddProduct(ProductType.Laptop, -1);
 
+            // Assert
             act.Should().Throw<ArgumentException>()
-               .WithMessage(ErrorMessages.QuantityMustBePositive + "*") 
+               .WithMessage(ErrorMessages.QuantityMustBePositive + "*")
                .And.ParamName.Should().Be("quantity");
         }
 
-
         [Fact]
-        public void CreateStrategy_WithNullCustomer_ThrowsArgumentNullException()
+        public void CreateStrategy_WhenCustomerIsNull_ShouldThrowArgumentNullException()
         {
-            // Act & Assert
+            // Act
             Action act = () => PricingStrategyFactory.CreateStrategy(null!);
+
+            // Assert
             act.Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
-        public void CreateStrategy_WithInvalidCustomerType_ThrowsArgumentException()
+        public void CreateStrategy_WhenCustomerTypeIsInvalid_ShouldThrowArgumentException()
         {
-            // Arrange - A fictive class
-            var unsupportedClient = new InvalidCustomerType();
+            // Arrange
+            var invalidCustomer = new InvalidCustomerType();
 
-            // Act & Assert
-            Action act = () => PricingStrategyFactory.CreateStrategy(unsupportedClient);
+            // Act
+            Action act = () => PricingStrategyFactory.CreateStrategy(invalidCustomer);
 
+            // Assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage(ErrorMessages.InvalidCustomerType + "*")
-                .And.ParamName.Should().Be("customer");
+               .WithMessage(ErrorMessages.InvalidCustomerType + "*")
+               .And.ParamName.Should().Be("customer");
         }
     }
 }

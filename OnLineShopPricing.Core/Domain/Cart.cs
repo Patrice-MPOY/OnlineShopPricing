@@ -1,5 +1,6 @@
 ﻿using OnlineShopPricing.Core.Resources;
 using OnlineShopPricing.Core.Services;
+
 namespace OnlineShopPricing.Core.Domain
 {
     /// <summary>
@@ -13,7 +14,9 @@ namespace OnlineShopPricing.Core.Domain
     {
         private readonly Dictionary<ProductType, int> _items = [];
         private readonly IPricingStrategy _pricingStrategy = pricingStrategy ?? throw new ArgumentNullException(nameof(pricingStrategy));
-
+        public IReadOnlyDictionary<ProductType, int> Items => _items;
+        public Customer Customer => customer;
+               
         public void AddProduct(ProductType product, int quantity)
         {
             GuardAgainstNonPositiveQuantity(quantity);
@@ -21,6 +24,11 @@ namespace OnlineShopPricing.Core.Domain
 
             IncreaseProductQuantity(product, quantity);
         }
+
+        public decimal CalculateTotal() =>
+            _items.Sum(item => _pricingStrategy.GetUnitPrice(item.Key) * item.Value);
+
+        
         private static void GuardAgainstNonPositiveQuantity(int quantity)
         {
             if (quantity <= 0)
@@ -28,6 +36,7 @@ namespace OnlineShopPricing.Core.Domain
                 throw new ArgumentException(ErrorMessages.QuantityMustBePositive, nameof(quantity));
             }
         }
+
         private void GuardAgainstUnpricedProduct(ProductType product)
         {
             // Validation of ProductType: the product must exist in the current pricing grid
@@ -36,13 +45,10 @@ namespace OnlineShopPricing.Core.Domain
                 throw new ArgumentException(ErrorMessages.InvalidProductType, nameof(product));
             }
         }
+
         private void IncreaseProductQuantity(ProductType product, int quantity)
         {
             _items[product] = _items.GetValueOrDefault(product) + quantity;
         }
-        public decimal CalculateTotal() =>
-            _items.Sum(item => _pricingStrategy.GetUnitPrice(item.Key) * item.Value);
-        public IReadOnlyDictionary<ProductType, int> Items => _items;
-        public Customer Customer => customer;
     }
 }

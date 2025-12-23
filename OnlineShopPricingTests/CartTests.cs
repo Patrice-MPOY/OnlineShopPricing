@@ -3,10 +3,10 @@ using Moq;
 using OnlineShopPricing.Core.Domain;
 using OnlineShopPricing.Core.Resources;
 using OnlineShopPricing.Core.Services;
-
-namespace OnlineShopPricing.Tests;
-public class CartTests
+namespace OnlineShopPricing.Tests
 {
+    public class CartTests
+    {
     // ==================================================================================
     // Isolated Unit Tests (using mocked IPricingStrategy)
     // Purpose: Test the pure mechanics of the Cart independently of actual pricing rules
@@ -56,8 +56,7 @@ public class CartTests
         mockStrategy.Verify(s => s.GetUnitPrice(ProductType.Laptop), Times.Once);
 
         // Ensure no unexpected calls were made to the strategy.
-        // This protects against future regressions.
-        
+        // This protects against future regressions.        
     }
 
     [Fact]
@@ -93,7 +92,6 @@ public class CartTests
         // Assert
         cart.CalculateTotal().Should().Be(500m); // 5 * 100
     }
-
 
     // =====================================================================================
     // Light Integration Tests (using real pricing strategy)
@@ -137,9 +135,10 @@ public class CartTests
         // Act
         decimal total = cart.CalculateTotal();
 
-        // Assert (with Fluent Assertions)
+        // Assert 
         decimal expected = hugeQuantity * 1500m;
         total.Should().Be(expected,
             because: ErrorMessages.VeryLargeQuantityTestExplanation) ;
+    }
     }
 }
