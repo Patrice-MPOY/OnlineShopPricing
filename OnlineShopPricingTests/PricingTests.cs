@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using OnlineShopPricing.Core.Domain;
+using OnlineShopPricing.Core.Domain.Exceptions;
 using OnlineShopPricing.Core.Resources;
 using OnlineShopPricing.Core.Services;
 using OnlineShopPricing.Tests.TestHelpers;
@@ -82,7 +83,7 @@ namespace OnlineShopPricingTests
         }
 
         [Fact]
-        public void AddProduct_WhenQuantityIsNegative_ShouldThrowArgumentException()
+        public void AddProduct_WhenQuantityIsNegative_ShouldThrowInvalidQuantityException()
         {
             // Arrange
             var customer = new IndividualCustomer("IND001", "John", "Doe");
@@ -93,9 +94,9 @@ namespace OnlineShopPricingTests
             Action act = () => cart.AddProduct(ProductType.Laptop, -1);
 
             // Assert
-            act.Should().Throw<ArgumentException>()
-               .WithMessage(ErrorMessages.QuantityMustBePositive + "*")
-               .And.ParamName.Should().Be("quantity");
+            act.Should().Throw<InvalidQuantityException>()
+                .WithMessage(ErrorMessages.QuantityMustBePositive + "*");
+            //.And.ParamName.Should().Be("quantity");
         }
 
         [Fact]

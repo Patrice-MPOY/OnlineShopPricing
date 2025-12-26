@@ -1,4 +1,5 @@
-﻿using OnlineShopPricing.Core.Resources;
+﻿using OnlineShopPricing.Core.Domain.Exceptions;
+using OnlineShopPricing.Core.Resources;
 using OnlineShopPricing.Core.Services;
 
 namespace OnlineShopPricing.Core.Domain
@@ -24,28 +25,27 @@ namespace OnlineShopPricing.Core.Domain
 
             IncreaseProductQuantity(product, quantity);
         }
-
         public decimal CalculateTotal() =>
             _items.Sum(item => _pricingStrategy.GetUnitPrice(item.Key) * item.Value);
-
         
         private static void GuardAgainstNonPositiveQuantity(int quantity)
         {
             if (quantity <= 0)
             {
-                throw new ArgumentException(ErrorMessages.QuantityMustBePositive, nameof(quantity));
+                //throw new ArgumentException(ErrorMessages.QuantityMustBePositive, nameof(quantity));
+                //InvalidQuantityException
+                throw new InvalidQuantityException(quantity);
             }
         }
-
         private void GuardAgainstUnpricedProduct(ProductType product)
         {
             // Validation of ProductType: the product must exist in the current pricing grid
             if (!_pricingStrategy.TryGetUnitPrice(product, out _))
             {
-                throw new ArgumentException(ErrorMessages.InvalidProductType, nameof(product));
+                //throw new ArgumentException(ErrorMessages.InvalidProductType, nameof(product));
+                throw new InvalidProductTypeException(nameof(product));
             }
         }
-
         private void IncreaseProductQuantity(ProductType product, int quantity)
         {
             _items[product] = _items.GetValueOrDefault(product) + quantity;

@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Moq;
 using OnlineShopPricing.Core.Domain;
+using OnlineShopPricing.Core.Domain.Exceptions;
 using OnlineShopPricing.Core.Resources;
 using OnlineShopPricing.Core.Services;
 namespace OnlineShopPricing.Tests
@@ -100,7 +101,7 @@ namespace OnlineShopPricing.Tests
 
     [Fact]
     
-    public void Add_UnknownProduct_ThrowsArgumentException()
+    public void Add_UnknownProduct_ThrowsInvalidProductTypeException()
     {
         // Arrange
         // Create a real pricing strategy and a cart.
@@ -117,9 +118,10 @@ namespace OnlineShopPricing.Tests
         // Verify that the Cart rejects the unknown product with the centralized error message
         // from resources. Using the resource ensures the test remains in sync if the message changes
         // (e.g., for internationalization or UX improvements).
-        act.Should().Throw<ArgumentException>()
-           .WithMessage(string.Format(ErrorMessages.InvalidProductType, "999") + "*")
-           .And.ParamName.Should().Be("product");
+        
+        act.Should().Throw<InvalidProductTypeException>()
+           .WithMessage(string.Format(ErrorMessages.InvalidProductType, "999") + "*");
+          // .And.ParamName.Should().Be("product");
     }
 
     [Fact]
