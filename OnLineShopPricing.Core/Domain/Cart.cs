@@ -1,5 +1,4 @@
 ﻿using OnlineShopPricing.Core.Domain.Exceptions;
-using OnlineShopPricing.Core.Resources;
 using OnlineShopPricing.Core.Services;
 
 namespace OnlineShopPricing.Core.Domain
@@ -7,17 +6,26 @@ namespace OnlineShopPricing.Core.Domain
     /// <summary>
     /// Represents a shopping cart for a customer. Acts as an aggregate root in the domain.
     /// 
-    /// Uses constructor injection for the pricing strategy to demonstrate the Dependency Inversion Principle (DIP).
-    /// In this exercise, injection is manual for simplicity; in a real application (e.g., ASP.NET Core),
-    /// the strategy would be resolved via the built-in dependency injection container.
+    /// The pricing strategy is resolved polymorphically by the Customer itself 
+    /// through the GetPricingStrategy() method (Tell, Don't Ask principle).
+    /// This design eliminates the need for an external factory or manual injection,
+    /// making the domain more cohesive, extensible, and aligned with SOLID principles.
+    /// 
+    /// In a real application (e.g., ASP.NET Core), the Cart would be instantiated 
+    /// via the DI container with a scoped or transient lifestyle, receiving a fully 
+    /// configured Customer instance.
     /// </summary>
-    public class Cart(Customer customer, IPricingStrategy pricingStrategy)
+    public class Cart(Customer customer)
     {
         private readonly Dictionary<ProductType, int> _items = [];
-        private readonly IPricingStrategy _pricingStrategy = pricingStrategy ?? throw new ArgumentNullException(nameof(pricingStrategy));
+        private readonly IPricingStrategy _pricingStrategy =
+            (customer ?? throw new ArgumentNullException(nameof(customer)))
+            .GetPricingStrategy()
+            ;
+
         public IReadOnlyDictionary<ProductType, int> Items => _items;
         public Customer Customer => customer;
-               
+
         public void AddProduct(ProductType product, int quantity)
         {
             GuardAgainstNonPositiveQuantity(quantity);
@@ -32,8 +40,6 @@ namespace OnlineShopPricing.Core.Domain
         {
             if (quantity <= 0)
             {
-                //throw new ArgumentException(ErrorMessages.QuantityMustBePositive, nameof(quantity));
-                //InvalidQuantityException
                 throw new InvalidQuantityException(quantity);
             }
         }
@@ -42,7 +48,6 @@ namespace OnlineShopPricing.Core.Domain
             // Validation of ProductType: the product must exist in the current pricing grid
             if (!_pricingStrategy.TryGetUnitPrice(product, out _))
             {
-                //throw new ArgumentException(ErrorMessages.InvalidProductType, nameof(product));
                 throw new InvalidProductTypeException(nameof(product));
             }
         }

@@ -1,16 +1,29 @@
-﻿namespace OnlineShopPricing.Core.Domain
+﻿using OnlineShopPricing.Core.Services;
+
+namespace OnlineShopPricing.Core.Domain
 {
-    public class BusinessCustomer(
-        string customerId,
-        string companyName,
-        string registrationNumber,
-        decimal annualRevenue,
-        string? vatNumber = null) : Customer(customerId)
+    public sealed class BusinessCustomer : Customer
     {
-        public string CompanyName { get; } = companyName ?? throw new ArgumentNullException(nameof(companyName));
-        public string? VatNumber { get; } = vatNumber;
-        public string RegistrationNumber { get; } = registrationNumber ?? throw new ArgumentNullException(nameof(registrationNumber));
-        public decimal AnnualRevenue { get; } = annualRevenue;
-        public bool IsLargeAccount => AnnualRevenue > 10_000_000m;
+        public string CompanyName { get; }
+        public string RegistrationNumber { get; }
+        public decimal AnnualTurnover { get; }
+        public BusinessCustomer(
+            string id,
+            string companyName,
+            string registrationNumber,
+            decimal annualTurnover)
+            : base(id)
+        {
+            CompanyName = companyName;
+            RegistrationNumber = registrationNumber;
+            AnnualTurnover = annualTurnover;
+        }
+        
+        public override IPricingStrategy GetPricingStrategy()
+        {
+           return AnnualTurnover > 10_000_000m
+                ? new LargeBusinessPricingStrategy()
+                : new SmallBusinessPricingStrategy();
+        }
     }
 }

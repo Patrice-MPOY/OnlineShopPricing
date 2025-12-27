@@ -10,7 +10,6 @@ namespace OnlineShopPricing.Core.Services
             { ProductType.MidRangePhone, 550m },
             { ProductType.Laptop, 900m }
             };
-
         protected override IReadOnlyDictionary<ProductType, decimal> Prices => _prices;
     }
 }
