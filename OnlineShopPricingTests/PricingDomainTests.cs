@@ -1,7 +1,5 @@
 ﻿using FluentAssertions;
 using OnlineShopPricing.Core.Domain;
-using OnlineShopPricing.Core.Domain.Exceptions;
-using OnlineShopPricing.Core.Resources;
 
 namespace OnlineShopPricingTests
 {
@@ -89,8 +87,6 @@ namespace OnlineShopPricingTests
             // Assert
             total.Should().Be(expectedTotal);
         }
-
-       
         
         public static IEnumerable<object[]> ConsistentPriceTestData => new List<object[]>
         {
@@ -123,8 +119,6 @@ namespace OnlineShopPricingTests
             // Assert
             firstPrice.Should().Be(secondPrice);
         }
-
-
 
     }
 }

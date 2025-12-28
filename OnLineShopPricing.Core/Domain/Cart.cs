@@ -22,7 +22,6 @@ namespace OnlineShopPricing.Core.Domain
             (customer ?? throw new ArgumentNullException(nameof(customer)))
             .GetPricingStrategy()
             ;
-
         public IReadOnlyDictionary<ProductType, int> Items => _items;
         public Customer Customer => customer;
 

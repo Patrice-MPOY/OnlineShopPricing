@@ -41,7 +41,8 @@ The solution is organised as a multi-project setup for clarity and maintainabili
   - `CartDomainTests`: cart aggregate behaviour and invariants
 
 - **No external dependencies**  
-  The solution intentionally focuses on pure domain logic, remaining simple and focused on the exercise while being production-ready from a design perspective.
+  The solution intentionally focuses on pure domain logic, remaining simple and focused on the exercise 
+  while being production-ready from a design perspective.
 
 ## Tests
 
@@ -58,10 +59,10 @@ All tests should pass and cover:
 - Cart persistence and multi-device synchronisation
 - Integration into an ASP.NET Core Web API
 
----
+--------
 
 Thank you for reviewing this exercise.  
-I look forward to discussing the design choices, the evolution from a factory-based approach to polymorphic resolution, 
-the testing strategy, and how this domain model could evolve in a larger system.
+I look forward to discussing the design choices, the evolution from a factory-based approach to polymorphic 
+resolution, the testing strategy, and how this domain model could evolve in a larger system.
 
 **Patrice MPOY**

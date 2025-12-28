@@ -1,6 +1,5 @@
 ﻿
-    using global::OnlineShopPricing.Core.Resources;
-    using System;
+    using OnlineShopPricing.Core.Resources;
 
     namespace OnlineShopPricing.Core.Domain.Exceptions
     {
@@ -14,12 +13,10 @@
                 : base(ErrorMessages.InvalidCustomerType)
             {
             }
-
             public InvalidCustomerTypeException(string message)
                 : base(message)
             {
             }
-
             public InvalidCustomerTypeException(string message, Exception innerException)
                 : base(message, innerException)
             {

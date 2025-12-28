@@ -2,15 +2,9 @@
 
 namespace OnlineShopPricing.Core.Domain.Exceptions
 {
-    public class InvalidProductTypeException : DomainException
+    public class InvalidProductTypeException(string productType) : DomainException(string.Format(ErrorMessages.InvalidProductType, productType))
     {
-        public string ProductType { get; }
-
-        public InvalidProductTypeException(string productType)
-            : base(string.Format(ErrorMessages.InvalidProductType, productType))
-        {
-            ProductType = productType;
-        }
+        public string ProductType { get; } = productType;
     }
 }
 

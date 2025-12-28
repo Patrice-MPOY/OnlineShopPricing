@@ -1,5 +1,5 @@
 ﻿using OnlineShopPricing.Core.Domain;
-using System.Collections.Generic;
+
 namespace OnlineShopPricing.Core.Services
 {
         /// <summary>

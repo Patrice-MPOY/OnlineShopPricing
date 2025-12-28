@@ -1,6 +1,4 @@
 ﻿
-using System;
-
 namespace OnlineShopPricing.Core.Domain.Exceptions
 {
     /// <summary>
