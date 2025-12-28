@@ -2,53 +2,66 @@
 
 ## Overview
 
-This repository implements a cart pricing calculation for an online shop, as per the provided technical exercise.
+This repository implements a cart pricing calculation for an online shop, as part of a technical exercise.
 
-The solution computes the total cost of a customer's cart using one of three pricing grids based on customer type:
+The solution computes the total cost of a customer's cart by applying one of three pricing grids, determined by the customer type:
 - Individual customers
-- Business customers with annual revenue < €10M
-- Business customers with annual revenue ≥ €10M
+- Small business customers (annual turnover < €10M)
+- Large business customers (annual turnover ≥ €10M)
 
 ## Solution Structure
 
-Multi-project solution for clarity and reusability:
+The solution is organised as a multi-project setup for clarity and maintainability:
 
 - **OnlineShopPricing.Core** (.NET Class Library)  
   Core domain and business logic:
-  - `Domain`: `Customer` (abstract base), `IndividualCustomer`, `BusinessCustomer`, `ProductType`, `Cart` (aggregate root)
-  - `Services`: `IPricingStrategy`, concrete strategies, injectable `PricingStrategyFactory`
+  - `Domain`: `Customer` (abstract base with polymorphic behaviour), `IndividualCustomer`, `BusinessCustomer`, `ProductType` (enum), `Cart` (aggregate root)
+  - `Services`: `IPricingStrategy`, `PricingStrategyBase`, and concrete pricing strategies (`IndividualPricingStrategy`, `SmallBusinessPricingStrategy`, `LargeBusinessPricingStrategy`)
 
 - **OnlineShopPricing.Tests** (xUnit Test Project)  
-  Comprehensive test suite using xUnit, FluentAssertions, and Moq:
-  - End-to-end integration tests covering all pricing scenarios and edge cases
-  - Isolated unit tests demonstrating dependency injection and mocking
-  - Test helpers for unsupported scenarios
+  Domain-focused test suite using xUnit and FluentAssertions:
+  - `PricingDomainTests`: validates correct pricing grid selection and strategy behaviour
+  - `CartDomainTests`: validates cart mechanics, invariants, and edge cases
+  - All tests rely exclusively on real domain objects (no mocks)
 
 ## Key Design Decisions
 
-- **Strategy pattern** for pricing variability – easily extensible for new segments or promotions.
-- **Dependency injection** in `Cart` and `PricingStrategyFactory` for testability and adherence to DIP.
-- **No console application** – the library is the deliverable; behavior is fully validated through tests (executable documentation).
-- **Pure domain** – no external dependencies or persistence, focused on the exercise while remaining production-ready in structure.
+- **Polymorphic pricing strategy resolution**  
+  The `Customer` itself is responsible for returning its appropriate IPricingStrategy via an abstract `GetPricingStrategy()` method  
+  This removes the need for an external factory, follows the **Tell, Don’t Ask** principle, and adheres to **Open/Closed** and **Single Responsibility** principles.
 
-## Running the Tests
-``bash
-dotnet test
+- **Domain-centric design**  
+  Pricing rules are encapsulated within the customer hierarchy, resulting in high cohesion and natural extensibility.
 
-All tests should pass, covering:
-- The three pricing grids
-- Defensive cases (negative quantity, null client, unsupported client type, unknown product)
-- Isolated cart behavior with mocked pricing strategy
+- **Simplified Cart API**  
+  The `Cart` only requires a `Customer`. Pricing strategy resolution is delegated to the domain model itself.
+
+- **Clear test separation**  
+  - `PricingDomainTests`: pricing rules and strategy behaviour
+  - `CartDomainTests`: cart aggregate behaviour and invariants
+
+- **No external dependencies**  
+  The solution intentionally focuses on pure domain logic, remaining simple and focused on the exercise while being production-ready from a design perspective.
+
+## Tests
+
+All tests should pass and cover:
+- Correct application of the three pricing grids (including the €10M boundary case)
+- Cart invariants (quantity > 0, known product, non-null customer)
+- Edge cases (empty cart, very large quantities)
 
 ## Potential Extensions
 
-- Configurable pricing (JSON, database)
-- Discount and promotion rules
-- Cart persistence (Redis, relational database)
-- Integration into an ASP.NET Core API or microservice
+- Externalised pricing configuration (database, feature flags, admin UI)
+- Volume-based, time-limited, or customer-specific promotions
+- Additional customer segments (VIP, nonprofit, etc.)
+- Cart persistence and multi-device synchronisation
+- Integration into an ASP.NET Core Web API
 
-Thank you for the exercise – I look forward to discussing the design choices and trade-offs 
-during the technical interview.
+---
 
-Patrice MPOY
+Thank you for reviewing this exercise.  
+I look forward to discussing the design choices, the evolution from a factory-based approach to polymorphic resolution, 
+the testing strategy, and how this domain model could evolve in a larger system.
 
+**Patrice MPOY**

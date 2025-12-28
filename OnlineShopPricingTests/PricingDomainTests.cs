@@ -13,7 +13,7 @@ namespace OnlineShopPricingTests
     /// The pricing strategy is now resolved polymorphically via Customer.GetPricingStrategy(),
     /// making the design more domain-centric, extensible, and aligned with SOLID principles.
     /// </summary>
-    public class PricingTests
+    public class PricingDomainTests
     {
         // Shared test data for parameterized pricing tests - unchanged
         public static IEnumerable<object[]> CalculateTotalTestData => new List<object[]>
@@ -90,33 +90,7 @@ namespace OnlineShopPricingTests
             total.Should().Be(expectedTotal);
         }
 
-        [Theory]
-        [InlineData(-1)]
-        [InlineData(0)]
-        public void AddProduct_WhenQuantityIsZeroOrNegative_ShouldThrowInvalidQuantityException(int invalidQuantity)
-        {
-            // Arrange
-            var customer = new IndividualCustomer("IND001", "John", "Doe");
-            var cart = new Cart(customer);
-
-            // Act
-            Action act = () => cart.AddProduct(ProductType.Laptop, invalidQuantity);
-
-            // Assert
-            act.Should().ThrowExactly<InvalidQuantityException>()
-               .WithMessage(ErrorMessages.QuantityMustBePositive + "*");
-        }
-
-        [Fact]
-        public void Cart_WhenCustomerIsNull_ShouldThrowArgumentNullException()
-        {
-            // Act
-            Action act = static () => new Cart(null!);
-
-            // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
-               .And.ParamName.Should().Be("customer");
-        }
+       
         
         public static IEnumerable<object[]> ConsistentPriceTestData => new List<object[]>
         {
