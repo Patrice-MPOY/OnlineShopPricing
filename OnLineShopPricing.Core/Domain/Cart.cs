@@ -17,12 +17,12 @@ namespace OnlineShopPricing.Core.Domain
     /// </summary>
     public class Cart(Customer customer)
     {
-        private readonly Dictionary<ProductType, int> _items = [];
+        private readonly Dictionary<ProductType, int> _productQuantities = [];
         private readonly IPricingStrategy _pricingStrategy =
             (customer ?? throw new ArgumentNullException(nameof(customer)))
             .GetPricingStrategy()
             ;
-        public IReadOnlyDictionary<ProductType, int> Items => _items;
+        public IReadOnlyDictionary<ProductType, int> Items => _productQuantities;
         public Customer Customer => customer;
 
         public void AddProduct(ProductType product, int quantity)
@@ -32,9 +32,11 @@ namespace OnlineShopPricing.Core.Domain
 
             IncreaseProductQuantity(product, quantity);
         }
-        public decimal CalculateTotal() =>
-            _items.Sum(item => _pricingStrategy.GetUnitPrice(item.Key) * item.Value);
         
+        public decimal CalculateTotal() =>
+            _productQuantities.Sum(entry =>
+                _pricingStrategy.GetUnitPrice(entry.Key) * entry.Value);
+
         private static void GuardAgainstNonPositiveQuantity(int quantity)
         {
             if (quantity <= 0)
@@ -52,7 +54,7 @@ namespace OnlineShopPricing.Core.Domain
         }
         private void IncreaseProductQuantity(ProductType product, int quantity)
         {
-            _items[product] = _items.GetValueOrDefault(product) + quantity;
+            _productQuantities[product] = _productQuantities.GetValueOrDefault(product) + quantity;
         }
     }
 }
