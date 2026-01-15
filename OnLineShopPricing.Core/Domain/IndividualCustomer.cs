@@ -1,12 +1,25 @@
-﻿using OnlineShopPricing.Core.Services;
+﻿using OnlineShopPricing.Core.Domain.Exceptions;
+using OnlineShopPricing.Core.Services;
+
 namespace OnlineShopPricing.Core.Domain
 {
-    public sealed class IndividualCustomer(string customerId, string firstName, string lastName)
+    public sealed class IndividualCustomer(
+        string customerId,
+        string firstName,
+        string lastName)
         : Customer(customerId)
     {
-        public string FirstName { get; } = firstName ?? throw new ArgumentNullException(nameof(firstName));
-        public string LastName { get; } = lastName ?? throw new ArgumentNullException(nameof(lastName));
+        public string FirstName { get; } =
+            !string.IsNullOrWhiteSpace(firstName)
+                ? firstName
+                : throw new InvalidFirstNameException();
 
-        public override IPricingStrategy GetPricingStrategy() => new IndividualPricingStrategy();
+        public string LastName { get; } =
+            !string.IsNullOrWhiteSpace(lastName)
+                ? lastName
+                : throw new InvalidLastNameException();
+
+        public override IPricingStrategy GetPricingStrategy()
+            => new IndividualPricingStrategy();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using OnlineShopPricing.Core.Domain;
+using OnlineShopPricing.Core.Domain.ValueObjects;
 
 namespace OnlineShopPricing.Core.Services
 {
@@ -19,7 +20,7 @@ namespace OnlineShopPricing.Core.Services
             /// Each concrete strategy (Individual, Small Business, Large Business) provides its own
             /// price grid by overriding this property.
             /// </summary>
-            protected abstract IReadOnlyDictionary<ProductType, decimal> Prices { get; }
+            protected abstract IReadOnlyDictionary<ProductType, Money> Prices { get; }
 
             /// <summary>
             /// Tries to retrieve the unit price for the specified product type.
@@ -36,7 +37,7 @@ namespace OnlineShopPricing.Core.Services
             /// This method is used by the Cart during AddProduct to validate that the product
             /// exists in the current pricing grid before accepting it.
             /// </remarks>
-            public bool TryGetUnitPrice(ProductType product, out decimal price)
+            public bool TryGetUnitPrice(ProductType product, out Money price)
             {
                 return Prices.TryGetValue(product, out price);
             }
@@ -55,7 +56,7 @@ namespace OnlineShopPricing.Core.Services
             /// to compute the line total (price × quantity).
             /// It uses the indexer for brevity, accepting the default KeyNotFoundException behavior.
             /// </remarks>
-            public decimal GetUnitPrice(ProductType product)
+            public Money GetUnitPrice(ProductType product)
             {
                 return Prices[product];
             }

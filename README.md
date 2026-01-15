@@ -9,6 +9,20 @@ The solution computes the total cost of a customer's cart by applying one of thr
 - Small business customers (annual turnover < €10M)
 - Large business customers (annual turnover ≥ €10M)
 
+## Versions & Evolutions
+
+- **v1.0-exercise-submission**  
+  Exact version submitted as part of the recruitment exercise (January 2026).  
+  Commit: [9088856](https://github.com/Patrice-MPOY/OnlineShopPricing/commit/9088856)  
+  → [View code at this tag](https://github.com/Patrice-MPOY/OnlineShopPricing/tree/v1.0-exercise-submission)
+
+- **Post-submission evolutions** (personal learning after the recruitment process was paused)  
+  - Introduction of `Entity<T>` base class and `IAggregateRoot` marker interface  
+  - Implementation of Domain Events (e.g. `ProductAddedToCart`)  
+  - Refactoring of `Cart` to act as a true Aggregate Root with an internal collection of domain events  
+  - Exhaustive unit and behavioral tests  
+
+
 ## Solution Structure
 
 The solution is organised as a multi-project setup for clarity and maintainability:
@@ -43,6 +57,17 @@ The solution is organised as a multi-project setup for clarity and maintainabili
 - **No external dependencies**  
   The solution intentionally focuses on pure domain logic, remaining simple and focused on the exercise 
   while being production-ready from a design perspective.
+
+- **Financial amounts encapsulated in `Money` Value Object**  
+  All monetary values (unit prices, totals, subtotals, etc.) are represented using the immutable `Money` type 
+  instead of raw `decimal`.  
+  - **Strict rule**: Never use `decimal` directly for financial amounts in the domain  
+  - Key benefits:  
+    - Enforces domain invariants (amount ≥ 0) at construction time  
+    - Prevents primitive obsession and confusion between prices, quantities, rates, etc.  
+    - Provides value-based equality, immutability, and natural domain operators (`+`, `*`)  
+    - Implicit EUR currency (multi-currency not needed for this exercise – YAGNI)  
+  - Location: `OnlineShopPricing.Core/Domain/ValueObjects/Money.cs`
 
 ## Tests
 

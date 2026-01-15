@@ -1,4 +1,5 @@
-﻿using OnlineShopPricing.Core.Services;
+﻿using OnlineShopPricing.Core.Domain.Exceptions;
+using OnlineShopPricing.Core.Services;
 
 namespace OnlineShopPricing.Core.Domain
 {
@@ -10,7 +11,7 @@ namespace OnlineShopPricing.Core.Domain
     public abstract class Customer(string customerId)
         {
             public string CustomerId { get; } = customerId
-                                                ?? throw new ArgumentNullException(nameof(customerId));
+                                                ?? throw new MissingCustomerIdException(nameof(customerId));
 
         /// <summary>
         /// Returns the pricing strategy applicable to this customer.

@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using OnlineShopPricing.Core.Domain;
 using OnlineShopPricing.Core.Domain.Exceptions;
+using OnlineShopPricing.Core.Domain.ValueObjects;
 using OnlineShopPricing.Core.Resources;
 
 namespace OnlineShopPricingTests
@@ -29,7 +30,7 @@ namespace OnlineShopPricingTests
             var total = cart.CalculateTotal();
 
             // Assert
-            total.Should().Be(0m, "an empty cart contains no billable items");
+            total.Should().Be(Money.Zero);
         }
 
         [Fact]
@@ -110,14 +111,65 @@ namespace OnlineShopPricingTests
         // =============================================================================
 
         [Fact]
-        public void Cart_WhenCustomerIsNull_ShouldThrowArgumentNullException()
+        public void Cart_WhenCustomerIsNull_ShouldThrowMissingCustomerException()
         {
             // Act
             Action act = static () => new Cart(null!);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
-               .And.ParamName.Should().Be("customer");
+            act.Should().ThrowExactly<MissingCustomerException>();
+        }
+
+        [Fact]
+        public void Cart_ShouldAlwaysBelongToTheCorrectCustomer_AndLinkShouldBeImmutable()
+        {
+            // Arrange
+            var expectedCustomer = new IndividualCustomer("CUST-123", "John", "Doe");
+            var wrongCustomer = new IndividualCustomer("CUST-999", "Jane", "Doe");
+
+            // Act
+            var cart = new Cart(expectedCustomer);
+
+            // Assert
+            cart.Customer.Should().BeSameAs(expectedCustomer);
+            cart.Customer.CustomerId.Should().Be("CUST-123");
+
+            cart.Customer.Should().NotBeSameAs(wrongCustomer);
+            cart.Customer.Should().NotBeNull();
+        }
+
+
+        [Fact]
+        public void CalculateTotal_ReflectsCurrentPricing_WhenCustomerStateIsUpgraded()
+        {
+            // Arrange - Initial cart with an individual customer (high-end phone = 1500 €)
+            var initialCustomer = new IndividualCustomer("C001", "Jean", "Dupont");
+            var cart = new Cart(initialCustomer);
+            cart.AddProduct(ProductType.HighEndPhone, 2);
+
+            // Assert - Verify initial total (2 × 1500 € = 3000 €)
+
+            cart.CalculateTotal().Amount
+                .Should()
+                .Be(3000m,
+                    "2 high-end phones at individual pricing should cost 3000 €");
+
+
+            // Arrange - Simulate customer upgrade to large business (same ID, new profile with CA > 10M)
+            var upgradedCustomer = new BusinessCustomer(
+                "C001",
+                "TechCorp",
+                "FR123",
+                "987654",
+                15_000_000m);
+
+            // Act - Create a refreshed cart with the same content but upgraded customer
+            var upgradedCart = new Cart(upgradedCustomer);
+            upgradedCart.AddProduct(ProductType.HighEndPhone, 2);  // Same content as before
+
+            // Assert - Total should now reflect the new pricing strategy (2 × 1000 € = 2000 €)
+            upgradedCart.CalculateTotal().Amount.Should().Be(2000m,
+                "Total should reflect the new pricing strategy after customer upgrade");
         }
     }
 }
