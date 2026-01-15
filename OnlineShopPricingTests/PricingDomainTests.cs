@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
 using OnlineShopPricing.Core.Domain;
+using OnlineShopPricing.Core.Domain.Exceptions;
+using OnlineShopPricing.Core.Domain.ValueObjects;
+using Xunit;
 
 namespace OnlineShopPricingTests
 {
@@ -31,7 +34,7 @@ namespace OnlineShopPricingTests
             // Small business pricing (annual turnover < 10M)
             new object[]
             {
-                new BusinessCustomer("BIZ001", "Small Corp", "FR927654321", "REG450",5_000_000m),
+                new BusinessCustomer("BIZ001", "Small Corp", "FR927654321", "REG450", 5_000_000m),
                 new (ProductType Product, int Quantity)[]
                 {
                     (ProductType.HighEndPhone, 1),
@@ -111,7 +114,7 @@ namespace OnlineShopPricingTests
 
         [Theory]
         [MemberData(nameof(ConsistentPriceTestData))]
-        public void PricingStrategy_ReturnsConsistentPrice_ForGivenCustomerType(
+        public void PricingStrategy_ForGivenCustomerType_ShouldReturnConsistentPrice(
             Type customerType,
             decimal? turnover)
         {
@@ -144,9 +147,7 @@ namespace OnlineShopPricingTests
             // Assert
             firstPrice.Should().Be(
                 secondPrice,
-                "a pricing strategy must be deterministic for a given customer and product");
+                "Pricing strategy must be deterministic for a given customer and product");
         }
-
-
     }
 }

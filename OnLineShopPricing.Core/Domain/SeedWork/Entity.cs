@@ -16,11 +16,11 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
     /// - EF Core friendly: virtual Id with protected setter
     /// - Safe handling of transient entities during equality checks
     ///
-    /// This class should be inherited by all domain entities (e.g., Cart, Order).
+    /// This class should be inherited by all domain entities (e.g., Cart, Order, Customer).
     /// </remarks>
-    /// <typeparam name="K">The type of the entity's primary key (typically Guid, int, or a strong ID type)</typeparam>
-    public abstract class Entity<K> : IEntity<K>
-        where K : notnull, IEquatable<K>
+    /// <typeparam name="TKey">The type of the entity's primary key (typically Guid, int, or a strong ID type)</typeparam>
+    public abstract class Entity<TKey> : IEntity<TKey>
+        where TKey : notnull, IEquatable<TKey>
     {
         /// <summary>
         /// Unique and immutable identifier of the entity.
@@ -30,7 +30,30 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
         /// - Protected setter allows EF Core to populate it during materialization.
         /// - In domain code, treat it as read-only.
         /// </remarks>
-        public virtual K Id { get; protected set; } = default!;
+        public virtual TKey Id { get; protected set; } = default!;
+
+        /// <summary>
+        /// Protected constructor to enforce that derived classes provide an ID at creation.
+        /// This ensures the identity is set immediately and remains immutable in domain logic.
+        /// </summary>
+        /// <param name="id">The unique identifier of the entity.</param>
+        protected Entity(TKey id)
+        {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            Id = id;
+        }
+
+        /// <summary>
+        /// Parameterless constructor for EF Core materialization.
+        /// EF Core uses reflection to set the Id property after querying the database.
+        /// </summary>
+        protected Entity()
+        {
+        }
 
         /// <summary>
         /// Determines whether the entity is transient (not yet persisted).
@@ -46,7 +69,7 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
         /// <returns>true if the entity has not been assigned a persistent identifier yet</returns>
         public virtual bool IsTransient()
         {
-            return EqualityComparer<K>.Default.Equals(Id, default);
+            return EqualityComparer<TKey>.Default.Equals(Id, default);
         }
 
         // ──────────────────────────────────────────────────────────────
@@ -60,7 +83,7 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
 
-            return Equals((Entity<K>)obj);
+            return Equals((Entity<TKey>)obj);
         }
 
         /// <summary>
@@ -70,7 +93,7 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
         /// Transient entities (Id = default) are compared by reference only.
         /// Persisted entities are compared by Id.
         /// </remarks>
-        protected virtual bool Equals(Entity<K>? other)
+        protected virtual bool Equals(Entity<TKey>? other)
         {
             if (other is null) return false;
 
@@ -100,7 +123,7 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
         /// <summary>
         /// Equality operator based on entity identity.
         /// </summary>
-        public static bool operator ==(Entity<K>? left, Entity<K>? right)
+        public static bool operator ==(Entity<TKey>? left, Entity<TKey>? right)
         {
             if (left is null) return right is null;
             return left.Equals(right);
@@ -109,7 +132,7 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
         /// <summary>
         /// Inequality operator based on entity identity.
         /// </summary>
-        public static bool operator !=(Entity<K>? left, Entity<K>? right)
+        public static bool operator !=(Entity<TKey>? left, Entity<TKey>? right)
         {
             return !(left == right);
         }

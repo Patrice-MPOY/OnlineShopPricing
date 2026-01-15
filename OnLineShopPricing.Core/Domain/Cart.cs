@@ -1,4 +1,5 @@
-﻿using OnlineShopPricing.Core.Domain.Exceptions;
+﻿using OnlineShopPricing.Core.Domain.Events;
+using OnlineShopPricing.Core.Domain.Exceptions;
 using OnlineShopPricing.Core.Domain.SeedWork;
 using OnlineShopPricing.Core.Domain.ValueObjects;
 using OnlineShopPricing.Core.Services;
@@ -15,7 +16,7 @@ namespace OnlineShopPricing.Core.Domain
     /// - A cart can only contain products priced by the active pricing strategy.
     /// </summary>
     
-    public class Cart(Customer customer) : IAggregateRoot
+    public class Cart(Customer customer) : AggregateRoot<Guid>(Guid.NewGuid())
     {
         /// <summary>
         /// The customer owning this cart. Read-only and guaranteed non-null.
@@ -117,6 +118,17 @@ namespace OnlineShopPricing.Core.Domain
             }
 
             _productQuantities[product] = newQuantity;
+
+            // Émission de l'événement ici → juste après la mutation réussie
+            AddDomainEvent(new ProductAddedToCart(
+                CartId: Id,
+                CustomerId: Customer.CustomerId,                   
+                Product: product,
+                QuantityAdded: quantity,
+                NewTotalQuantity: newQuantity,
+                UnitPrice: GetCurrentPricingStrategy().GetUnitPrice(product),
+                OccurredOn: DateTime.UtcNow
+            ));
         }
     }
 }

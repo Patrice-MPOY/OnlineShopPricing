@@ -1,12 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using OnlineShopPricing.Core.Domain.ValueObjects;
 
 namespace OnlineShopPricing.Core.Domain.Events
 {
-    internal class ProductAddedToCart
+    public record ProductAddedToCart(
+        Guid CartId,
+        string CustomerId,
+        ProductType Product,
+        int QuantityAdded,
+        int NewTotalQuantity,
+        Money UnitPrice,
+        DateTime OccurredOn
+    ) : IDomainEvent
     {
+        DateTime IDomainEvent.OccurredOn => OccurredOn;
     }
+    
 }
