@@ -1,5 +1,7 @@
 ﻿# Online Shop Pricing – Technical Exercise
 
+
+
 ## Overview
 
 This repository implements a cart pricing calculation for an online shop, as part of a technical exercise.
@@ -9,6 +11,24 @@ The solution computes the total cost of a customer's cart by applying one of thr
 - Small business customers (annual turnover < €10M)
 - Large business customers (annual turnover ≥ €10M)
 
+> Note: This solution deliberately applies a limited set of Domain-Driven Design (DDD) tactical patterns
+> (Aggregates, Value Objects, Domain Events) to structure the pricing logic.
+> Given the simplicity of the exercise, this is not presented as a mandatory approach,
+> but as one possible design that could scale with increased business complexity.
+
+---
+
+## Tech Stack
+
+- .NET 8 / .NET 9 (C# 12+, records, modern language features)
+- xUnit + FluentAssertions (pure domain tests, no mocks)
+- Domain-Driven Design (DDD) tactical patterns
+- Polymorphic behaviour (Customer → PricingStrategy)
+- Value Objects (`Money`)
+- No external dependencies for the core domain (pure POCOs)
+
+---
+
 ## Versions & Evolutions
 
 - **v1.0-exercise-submission**  
@@ -16,12 +36,15 @@ The solution computes the total cost of a customer's cart by applying one of thr
   Commit: [9088856](https://github.com/Patrice-MPOY/OnlineShopPricing/commit/9088856)  
   → [View code at this tag](https://github.com/Patrice-MPOY/OnlineShopPricing/tree/v1.0-exercise-submission)
 
-- **Post-submission evolutions** (personal learning after the recruitment process was paused)  
-  - Introduction of `Entity<T>` base class and `IAggregateRoot` marker interface  
-  - Implementation of Domain Events (e.g. `ProductAddedToCart`)  
-  - Refactoring of `Cart` to act as a true Aggregate Root with an internal collection of domain events  
-  - Exhaustive unit and behavioral tests  
+- **Post-submission evolutions** (personal learning after the recruitment process was paused)
+  - Introduction of a generic `Entity<T>` base class and `IAggregateRoot` marker interface
+  - Refactoring of `Cart` to act as a true Aggregate Root
+  - Implementation of Domain Events (e.g. `ProductAddedToCart`)
+  - Internal collection of domain events within aggregates
+  - Exhaustive unit and behavioural tests (consistent Should/When naming)
+  - **Planned**: EF Core integration with domain event dispatching via interceptor / Outbox pattern
 
+---
 
 ## Solution Structure
 
@@ -29,52 +52,59 @@ The solution is organised as a multi-project setup for clarity and maintainabili
 
 - **OnlineShopPricing.Core** (.NET Class Library)  
   Core domain and business logic:
-  - `Domain`: `Customer` (abstract base with polymorphic behaviour), `IndividualCustomer`, `BusinessCustomer`, `ProductType` (enum), `Cart` (aggregate root)
-  - `Services`: `IPricingStrategy`, `PricingStrategyBase`, and concrete pricing strategies (`IndividualPricingStrategy`, `SmallBusinessPricingStrategy`, `LargeBusinessPricingStrategy`)
+  - `Domain`: `Customer` (abstract base with polymorphic behaviour),  
+    `IndividualCustomer`, `BusinessCustomer`, `ProductType`, `Cart` (aggregate root)
+  - `Services`: `IPricingStrategy`, `PricingStrategyBase`, and concrete strategies  
+    (`IndividualPricingStrategy`, `SmallBusinessPricingStrategy`, `LargeBusinessPricingStrategy`)
+  - `ValueObjects`: `Money`
 
 - **OnlineShopPricing.Tests** (xUnit Test Project)  
-  Domain-focused test suite using xUnit and FluentAssertions:
-  - `PricingDomainTests`: validates correct pricing grid selection and strategy behaviour
-  - `CartDomainTests`: validates cart mechanics, invariants, and edge cases
-  - All tests rely exclusively on real domain objects (no mocks)
+  Domain-focused test suite:
+  - `PricingDomainTests`: pricing grid selection and strategy behaviour
+  - `CartDomainTests`: cart invariants, behaviour, and edge cases
+  - Tests rely exclusively on real domain objects (no mocks)
+
+---
 
 ## Key Design Decisions
 
 - **Polymorphic pricing strategy resolution**  
-  The `Customer` itself is responsible for returning its appropriate IPricingStrategy via an abstract `GetPricingStrategy()` method  
-  This removes the need for an external factory, follows the **Tell, Don’t Ask** principle, and adheres to **Open/Closed** and **Single Responsibility** principles.
+  The `Customer` is responsible for returning its appropriate `IPricingStrategy`
+  via an abstract `GetPricingStrategy()` method.  
+  This removes the need for an external factory, follows the **Tell, Don’t Ask**
+  principle, and adheres to **Open/Closed** and **Single Responsibility** principles.
 
 - **Domain-centric design**  
-  Pricing rules are encapsulated within the customer hierarchy, resulting in high cohesion and natural extensibility.
+  Pricing rules are encapsulated within the customer hierarchy, resulting in high cohesion
+  and natural extensibility.
 
 - **Simplified Cart API**  
-  The `Cart` only requires a `Customer`. Pricing strategy resolution is delegated to the domain model itself.
+  The `Cart` only requires a `Customer`. Pricing strategy resolution is delegated
+  to the domain model itself, avoiding orchestration logic in the application layer.
 
-- **Clear test separation**  
-  - `PricingDomainTests`: pricing rules and strategy behaviour
-  - `CartDomainTests`: cart aggregate behaviour and invariants
-
-- **No external dependencies**  
-  The solution intentionally focuses on pure domain logic, remaining simple and focused on the exercise 
-  while being production-ready from a design perspective.
+- **Domain Events (illustrative)**  
+  Domain events (e.g. `ProductAddedToCart`) are emitted by the aggregate but not yet consumed.
+  They illustrate how the model could evolve toward event-driven reactions
+  (analytics, promotions, projections) without coupling the core domain logic.
 
 - **Financial amounts encapsulated in `Money` Value Object**  
-  All monetary values (unit prices, totals, subtotals, etc.) are represented using the immutable `Money` type 
-  instead of raw `decimal`.  
-  - **Strict rule**: Never use `decimal` directly for financial amounts in the domain  
-  - Key benefits:  
-    - Enforces domain invariants (amount ≥ 0) at construction time  
-    - Prevents primitive obsession and confusion between prices, quantities, rates, etc.  
-    - Provides value-based equality, immutability, and natural domain operators (`+`, `*`)  
-    - Implicit EUR currency (multi-currency not needed for this exercise – YAGNI)  
-  - Location: `OnlineShopPricing.Core/Domain/ValueObjects/Money.cs`
+  Monetary values are never represented as raw `decimal` in the domain.
+  - Enforces invariants (amount ≥ 0)
+  - Prevents primitive obsession
+  - Immutable, value-based equality
+  - Natural operators (`+`, `*`)
+  - Implicit EUR currency (YAGNI for multi-currency)
+
+---
 
 ## Tests
 
 All tests should pass and cover:
-- Correct application of the three pricing grids (including the €10M boundary case)
+- Correct application of the three pricing grids (including the €10M boundary)
 - Cart invariants (quantity > 0, known product, non-null customer)
 - Edge cases (empty cart, very large quantities)
+
+---
 
 ## Potential Extensions
 
@@ -83,11 +113,13 @@ All tests should pass and cover:
 - Additional customer segments (VIP, nonprofit, etc.)
 - Cart persistence and multi-device synchronisation
 - Integration into an ASP.NET Core Web API
+- CQRS-style read models for pricing summaries
 
---------
+---
 
 Thank you for reviewing this exercise.  
-I look forward to discussing the design choices, the evolution from a factory-based approach to polymorphic 
-resolution, the testing strategy, and how this domain model could evolve in a larger system.
+I look forward to discussing the design choices (polymorphic resolution vs factory,
+domain events, testing strategy), how this model could evolve in a larger system
+(EF Core persistence, CQRS, microservices), and any feedback you may have.
 
 **Patrice MPOY**

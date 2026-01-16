@@ -30,7 +30,7 @@ namespace OnlineShopPricing.Core.Domain.SeedWork
         /// - Protected setter allows EF Core to populate it during materialization.
         /// - In domain code, treat it as read-only.
         /// </remarks>
-        public virtual TKey Id { get; protected set; } = default!;
+        public TKey Id { get; protected set; } = default!;
 
         /// <summary>
         /// Protected constructor to enforce that derived classes provide an ID at creation.
